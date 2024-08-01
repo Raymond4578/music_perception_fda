@@ -90,16 +90,19 @@ for music_idx in range(1, 13):
     obs_data_fd.plot()
     plt.tight_layout()
     plt.savefig(f'./output/plot/music{music_idx}/music{music_idx}_obs_data.png', dpi=300)
+    plt.close('all')
     # draw aligned data
     plt.figure()
     align_data_fd.plot()
     plt.tight_layout()
     plt.savefig(f'./output/plot/music{music_idx}/music{music_idx}_aligned_data.png', dpi=300)
+    plt.close('all')
     # draw warpping functions
     plt.figure()
     warp_func_fd.plot()
     plt.tight_layout()
     plt.savefig(f'./output/plot/music{music_idx}/music{music_idx}_warp_func.png', dpi=300)
+    plt.close('all')
 
 # Draw amp/pha dist distribution
 for music_idx in range(1, 13):
@@ -109,6 +112,7 @@ for music_idx in range(1, 13):
     plt.xlabel('Amplitude Distance')
     plt.tight_layout()
     plt.savefig(f'./output/plot/music{music_idx}/music{music_idx}_amp_dist.png', dpi=300)
+    plt.close('all')
 
     pha_dist_ls = pha_dist_dict[music_idx]
     plt.figure()
@@ -116,3 +120,4 @@ for music_idx in range(1, 13):
     plt.xlabel('Phase Distance')
     plt.tight_layout()
     plt.savefig(f'./output/plot/music{music_idx}/music{music_idx}_pha_dist.png', dpi=300)
+    plt.close('all')
