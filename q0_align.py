@@ -1,57 +1,20 @@
-import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import skfda
-from fdasrsf import pairwise_align_functions
 import fdasrsf.utility_functions as uf
 
-from dataloader import load_data
+from utils import load_data, check_folder, data_after_align
 
 # check wheter all the requred folders are exist or not
-output_path = './output'
-path_ls = [
-    output_path,
-    os.path.join(output_path, 'dataframe'),
-    os.path.join(output_path, 'plot'),
-]
-for music_idx in range(1, 13):
-    folder_name = f'music{music_idx}'
-    path_ls.append(os.path.join(output_path, 'plot', folder_name))
-path_ls.append(os.path.join(output_path, 'plot', 'func_reg'))
-
-for path in path_ls:
-    if not os.path.exists(path):
-        os.makedirs(path)
+check_folder()
 
 ########################################################
 
+# Load the data
 target_dict, data_dict = load_data('./data/')
-
-def align_data(target_dict:dict, data_dict:dict, music_idx=1):
-    # Then, do alignment for a specific music piece
-    t = np.linspace(0, 1, len(target_dict[music_idx]))
-    target = target_dict[music_idx]
-    data_df = data_dict[music_idx]
-    obs_data_ls, aligned_data_ls, warp_func_ls = list(), list(), list()
-    for index, row in data_df.iterrows():
-        # 这里可以看extract 数据index和受试者ID
-        row_data = row.iloc[2:].values.astype(float)
-        if np.isnan(row_data).all() == True:
-            print('有NA！！！！！')
-        obs_data_ls.append(row_data)
-        aligned_data, warp_func = pairwise_align_functions(target, row_data, t, omethod='DP2')[:2]
-        aligned_data_ls.append(aligned_data)
-        warp_func_ls.append(warp_func)
-    return obs_data_ls, aligned_data_ls, warp_func_ls
-
-# formulate a dictionary for observed data, aligned data and warpping functions
-obs_data_dict, aligned_data_dict, warp_func_dict = dict(), dict(), dict()
-for music_idx in range(1, 13):
-    obs_data_ls, aligned_data_ls, warp_func_ls = align_data(target_dict, data_dict, music_idx=music_idx)
-    obs_data_dict[music_idx] = obs_data_ls
-    aligned_data_dict[music_idx] = aligned_data_ls
-    warp_func_dict[music_idx] = warp_func_ls
+# Get data after alignemnt
+obs_data_dict, aligned_data_dict, warp_func_dict = data_after_align(target_dict, data_dict)
 
 # Extract the amp and pha distance statistics
 amp_pha_dist_tb, amp_dist_dict, pha_dist_dict = list(), dict(), dict()
