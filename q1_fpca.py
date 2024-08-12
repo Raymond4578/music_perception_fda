@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import skfda
 from skfda.representation.basis import BSplineBasis
 from skfda.preprocessing.dim_reduction import FPCA
+from skfda.exploratory.visualization import FPCAPlot
 
 from utils import load_data, check_folder, data_after_align
 
@@ -42,4 +43,19 @@ for i in range(1, 3):
     ax.set_title(f'Principle Component {i} ({aligned_data_pc_explained_ratio[i - 1]:.2%})')
 plt.tight_layout()
 plt.savefig(f'./output/plot/music{music_idx}/music{music_idx}_aligned_data_pc.png', dpi=300)
+plt.close()
+# Then generate the Mean Variation plot (mean function +- PC function)
+aligned_data_fpca_mean_pc_plot = FPCAPlot(
+    basis_aligned_data_fd.mean(),
+    aligned_data_fpca.components_,
+    fig=plt.figure(figsize=(2 * 6, 1 * 4)),
+    n_rows=1
+).plot()
+i = 0
+for ax, new_title in zip(aligned_data_fpca_mean_pc_plot.get_axes(), labels):
+    ax.set_title(f'{labels[i]} ({aligned_data_pc_explained_ratio[i]:.2%})')
+    ax.set_ylim(2.2, 6.4)
+    i += 1
+plt.tight_layout()
+plt.savefig(f'./output/plot/music{music_idx}/music{music_idx}_aligned_data_pc_var.png', dpi=300)
 plt.close()
