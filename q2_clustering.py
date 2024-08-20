@@ -128,14 +128,3 @@ for ID in all_id:
         pred_df.append(row_data)
 pred_df = pd.DataFrame(pred_df).dropna()
 pred_df.to_csv(f'./output/dataframe/clust_pred_results.csv', index=False)
-
-# # 假设data是包含两个分类变量的DataFrame
-# from scipy.stats import chi2_contingency
-# table = pd.crosstab(pred_df['amp_pred'], pred_df['pha_pred'])
-#
-# # 执行卡方检验
-# chi2, p, dof, expected = chi2_contingency(table)
-# print("Chi-square test statistic:", chi2)
-# print("p-value:", p)
-
-
