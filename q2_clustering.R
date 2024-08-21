@@ -1,4 +1,5 @@
 rm(list = ls())
+# Load the dataset
 dat <- read.csv('./output/dataframe/clust_pred_results.csv')
 dat$ID <- factor(dat$ID)
 dat$Emotion <- factor(dat$Emotion, levels = c('anger', 'happiness', 'sadness', 'tenderness'))
@@ -6,6 +7,7 @@ dat$Piece <- factor(dat$Piece)
 dat$amp_pred <- factor(dat$amp_pred, levels = c(0, 1))
 dat$pha_pred <- factor(dat$pha_pred, levels = c(0, 1))
 
+# Construct a mixture effect logistic model: amp_pred ~ pha_pred
 model <- lme4::glmer(
   amp_pred ~ pha_pred + (1 | ID),
   data = dat,
