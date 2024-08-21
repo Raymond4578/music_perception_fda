@@ -33,7 +33,7 @@ for music_idx in range(1, 13):
     aligned_data_pc_explained_ratio = aligned_data_fpca.explained_variance_ratio_
     # Then generate the PC function plot
     labels = ['Principle Component 1', 'Principle Component 2']
-    fig = plt.figure(figsize=(2 * 6, 1 * 4))  # 设置适当的尺寸
+    fig = plt.figure(figsize=(2 * 6, 1 * 4))  # Set the figure size
     for i in range(1, 3):
         ax = fig.add_subplot(1, 2, i)
         function_values = aligned_data_fpca.components_(t)[i - 1, :]
@@ -68,7 +68,7 @@ for music_idx in range(1, 13):
     warp_func_pc_explained_ratio = warp_func_fpca.explained_variance_ratio_
     # Then generate the PC function plot
     labels = ['Principle Component 1', 'Principle Component 2']
-    fig = plt.figure(figsize=(2 * 6, 1 * 4))  # 设置适当的尺寸
+    fig = plt.figure(figsize=(2 * 6, 1 * 4))  # Set the figure size
     for i in range(1, 3):
         ax = fig.add_subplot(1, 2, i)
         function_values = warp_func_fpca.components_(t)[i - 1, :]
