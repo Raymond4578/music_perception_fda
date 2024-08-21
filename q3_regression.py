@@ -27,13 +27,13 @@ for i in range(1, targets.shape[1]):
 
 # read in data
 file_paths = glob.glob('./data/music*.csv')
-# 使用正则表达式从每个路径中提取数字
+# Use regular expressions to extract numbers from each path
 def extract_number(path):
     match = re.search(r'\d+', path)
     if match:
         return int(match.group())
-    return None  # 对于没有数字的路径，返回None
-# 对路径列表进行排序，排序键为路径中的数字
+    return None  # For path without number，return None
+# Sort the list of paths by the numbers extracted from the paths
 file_paths = sorted(file_paths, key=extract_number)
 pattern = re.compile(r'music(\d+)\.csv')
 
@@ -67,18 +67,18 @@ for path in file_paths:
         row_data = row.iloc[2:].values.astype(float)
         t = np.linspace(0, 1, row_data.shape[0])
         aligned_data, warp_func = pairwise_align_functions(target_dict[idx], row_data, t, omethod='DP2')[:2]
-        # 算一下amp和phase的dist吧
+        # Calculate the amplitude and phase distance
         amp_dist, pha_dist = uf.elastic_distance(target_dict[idx], aligned_data, t, method='DP2', lam=0.0)
         amp_dist_ls.append(amp_dist)
         pha_dist_ls.append(pha_dist)
-        # 搞定aligned func的diff
+        # Calculate the differencing function for the aligned function
         diff_func_data = aligned_data - target_dict[idx]
-        # 创建BSpline插值对象
+        # Create a BSpline interpolation object
         bspline = make_interp_spline(t, diff_func_data, k=3)
         diff_aligned_data.append(bspline(t_new))
-        # 搞定warp func的diff
+        # Calculate the differencing function for the warping function
         diff_warp_data = warp_func - t
-        # 创建BSpline插值对象
+        # Create a BSpline interpolation object
         bspline = make_interp_spline(t, diff_warp_data, k=3)
         diff_warp_func.append(bspline(t_new))
     all_diff_aligned_data += diff_aligned_data
@@ -93,8 +93,9 @@ info_df.to_csv(f'./output/dataframe/amp_pha_dist_reg.csv', index=False)
 all_diff_aligned_data_fd = skfda.FDataGrid(data_matrix=all_diff_aligned_data, grid_points=t_new)
 all_diff_warp_func_fd = skfda.FDataGrid(data_matrix=all_diff_warp_func, grid_points=t_new)
 
-# 定义B样条基函数：从度数和节点数来定义
-# 例如，使用3度的B样条基，并设定8个内节点（不包含边界），因此总节点数为 3 + 8 + 2
+# Define the B-spline basis function: defined by the degree and the number of knots.
+# For example, use a degree-3 B-spline basis and set 8 internal knots (excluding boundaries),
+# so 3 + 8 + 2 knots in total.
 bspline_basis = BSplineBasis(domain_range=(0, 1), n_basis=10, order=4)  # order = degree + 1
 all_diff_aligned_data_fd_basis = all_diff_aligned_data_fd.to_basis(bspline_basis)
 all_diff_warp_func_fd_basis = all_diff_warp_func_fd.to_basis(bspline_basis)
