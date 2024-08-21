@@ -8,7 +8,7 @@ from fdasrsf import pairwise_align_functions
 from skfda.ml.clustering import KMeans
 from skfda.exploratory.visualization.clustering import ClusterPlot
 
-from utils import load_data, check_folder, data_after_align
+from utils import check_folder
 
 # check wheter all the requred folders are exist or not
 check_folder()
