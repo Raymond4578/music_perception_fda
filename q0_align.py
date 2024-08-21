@@ -25,7 +25,7 @@ for music_idx in range(1, 13):
     amp_dist_ls, pha_dist_ls = list(), list()
     # calculate all the amp and pha dist for this specific music
     for aligned_data in aligned_data_ls:
-        # 算一下amp和phase的dist吧
+        # Calculate the amplitude and phase distance
         amp_dist, pha_dist = uf.elastic_distance(target, aligned_data, t, method='DP2', lam=0.0)
         amp_dist_ls.append(amp_dist)
         pha_dist_ls.append(pha_dist)
