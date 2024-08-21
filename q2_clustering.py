@@ -25,13 +25,13 @@ for i in range(1, targets.shape[1]):
 
 # read in data
 file_paths = glob.glob('./data/music*.csv')
-# 使用正则表达式从每个路径中提取数字
+# Use regular expressions to extract numbers from each path
 def extract_number(path):
     match = re.search(r'\d+', path)
     if match:
         return int(match.group())
-    return None  # 对于没有数字的路径，返回None
-# 对路径列表进行排序，排序键为路径中的数字
+    return None  # For path without number，return None
+# Sort the list of paths by the numbers extracted from the paths
 file_paths = sorted(file_paths, key=extract_number)
 pattern = re.compile(r'music(\d+)\.csv')
 
@@ -62,14 +62,14 @@ for path in file_paths:
         diff_warp_data = abs(warp_func - t)
         diff_warp_func.append(diff_warp_data)
 
-    # 然后直接做clustering了
+    # Then do the clustering
     # transfrom data to skfda data
     dat_diff_fd = skfda.FDataGrid(data_matrix=diff_aligned_data, grid_points=t)
     warp_diff_fd = skfda.FDataGrid(data_matrix=diff_warp_func, grid_points=t)
 
     n_clusters = 2
     seed = 5003
-    # 首先先做aligned data的clustering
+    # First, do the clustering for the aligned data
     dat_diff_kmeans = KMeans(n_clusters=n_clusters, random_state=seed)
     dat_diff_kmeans.fit(dat_diff_fd)
     dat_diff_group = dat_diff_kmeans.predict(dat_diff_fd)
@@ -89,7 +89,7 @@ for path in file_paths:
         else:
             aligned_data_clust[key].append(np.nan)
 
-    # 然后再给warping function做clustering
+    # Then, do the clustering for warping function
     warp_diff_kmeans = KMeans(n_clusters=n_clusters, random_state=seed)
     warp_diff_kmeans.fit(warp_diff_fd)
     warp_diff_group = warp_diff_kmeans.predict(warp_diff_fd)
