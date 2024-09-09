@@ -16,7 +16,7 @@ check_folder()
 ########################################################
 
 # read in targets
-targets = pd.read_csv('./data/target_music.csv')
+targets = pd.read_csv('../data/target_music.csv')
 target_dict = dict()
 for i in range(1, targets.shape[1]):
     target = targets.iloc[:, i].values
@@ -24,7 +24,7 @@ for i in range(1, targets.shape[1]):
 
 
 # read in data
-file_paths = glob.glob('./data/music*.csv')
+file_paths = glob.glob('../data/music*.csv')
 # Use regular expressions to extract numbers from each path
 def extract_number(path):
     match = re.search(r'\d+', path)
