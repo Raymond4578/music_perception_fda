@@ -80,3 +80,25 @@ def data_after_align(target_dict, data_dict):
         aligned_data_dict[music_idx] = aligned_data_ls
         warp_func_dict[music_idx] = warp_func_ls
     return obs_data_dict, aligned_data_dict, warp_func_dict
+
+
+###################
+# no alignment
+###################
+def check_folder_na():
+    output_path = './output_na'
+    path_ls = [
+        output_path,
+        os.path.join(output_path, 'dataframe_na'),
+        os.path.join(output_path, 'plot_na'),
+    ]
+    for music_idx in range(1, 13):
+        folder_name = f'music{music_idx}_na'
+        path_ls.append(os.path.join(output_path, 'plot_na', folder_name))
+    path_ls.append(os.path.join(output_path, 'plot_na', 'func_reg_na'))
+
+    for path in path_ls:
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    return None
