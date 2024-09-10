@@ -81,41 +81,26 @@ for path in file_paths:
 # Save the amp and pha dist for regression as a csv file
 info_df.to_csv(f'./output_na/dataframe_na/amp_pha_dist_reg_na.csv', index=False)
 
-# all_diff_aligned_data_fd = skfda.FDataGrid(data_matrix=all_diff_aligned_data, grid_points=t_new)
-# all_diff_warp_func_fd = skfda.FDataGrid(data_matrix=all_diff_warp_func, grid_points=t_new)
-#
-# # Define the B-spline basis function: defined by the degree and the number of knots.
-# # For example, use a degree-3 B-spline basis and set 8 internal knots (excluding boundaries),
-# # so 3 + 8 + 2 knots in total.
-# bspline_basis = BSplineBasis(domain_range=(0, 1), n_basis=10, order=4)  # order = degree + 1
-# all_diff_aligned_data_fd_basis = all_diff_aligned_data_fd.to_basis(bspline_basis)
-# all_diff_warp_func_fd_basis = all_diff_warp_func_fd.to_basis(bspline_basis)
-#
-# emotions = ['anger', 'happiness', 'sadness', 'tenderness']
-# X = pd.get_dummies(info_df['Emotion'], prefix='Emotion').astype(int)
-#
-# # Do regression on aligned data differencing function
-# diff_aligned_data_linear_reg = LinearRegression(regularization=None, fit_intercept=False)
-# diff_aligned_data_linear_reg.fit(X, all_diff_aligned_data_fd_basis)
-# diff_aligned_data_coef_func_ls = diff_aligned_data_linear_reg.coef_
-# for i in range(len(diff_aligned_data_coef_func_ls)):
-#     diff_aligned_data_coef_func_ls[i].plot()
-#     plt.axhline(0, color='r', linestyle='--')
-#     # plt.title(f'Aligned Data Coefficient {emotions[i]}')
-#     plt.ylim(-2.7, 3)
-#     plt.tight_layout()
-#     plt.savefig(f'./output/plot/func_reg/data_diff_coef_{emotions[i]}.png', dpi=300)
-#     plt.close('all')
-#
-# # Do regression on warping function differencing function
-# diff_warp_func_linear_reg = LinearRegression(regularization=None, fit_intercept=False)
-# diff_warp_func_linear_reg.fit(X, all_diff_warp_func_fd_basis)
-# diff_warp_func_coef_func_ls = diff_warp_func_linear_reg.coef_
-# for i in range(len(diff_warp_func_coef_func_ls)):
-#     diff_warp_func_coef_func_ls[i].plot()
-#     plt.axhline(0, color='r', linestyle='--')
-#     # plt.title(f'Warping Function Coefficient {emotions[i]}')
-#     plt.ylim(-0.1, 0.1)
-#     plt.tight_layout()
-#     plt.savefig(f'./output/plot/func_reg/warp_diff_coef_{emotions[i]}.png', dpi=300)
-#     plt.close('all')
+all_diff_obs_data_fd = skfda.FDataGrid(data_matrix=all_diff_obs_data, grid_points=t_new)
+
+# Define the B-spline basis function: defined by the degree and the number of knots.
+# For example, use a degree-3 B-spline basis and set 8 internal knots (excluding boundaries),
+# so 3 + 8 + 2 knots in total.
+bspline_basis = BSplineBasis(domain_range=(0, 1), n_basis=10, order=4)  # order = degree + 1
+all_diff_obs_data_fd_basis = all_diff_obs_data_fd.to_basis(bspline_basis)
+
+emotions = ['anger', 'happiness', 'sadness', 'tenderness']
+X = pd.get_dummies(info_df['Emotion'], prefix='Emotion').astype(int)
+
+# Do regression on aligned data differencing function
+diff_obs_data_linear_reg = LinearRegression(regularization=None, fit_intercept=False)
+diff_obs_data_linear_reg.fit(X, all_diff_obs_data_fd_basis)
+diff_obs_data_coef_func_ls = diff_obs_data_linear_reg.coef_
+for i in range(len(diff_obs_data_coef_func_ls)):
+    diff_obs_data_coef_func_ls[i].plot()
+    plt.axhline(0, color='r', linestyle='--')
+    # plt.title(f'Aligned Data Coefficient {emotions[i]}')
+    plt.ylim(-2.7, 3)
+    plt.tight_layout()
+    plt.savefig(f'./output_na/plot_na/func_reg_na/data_diff_coef_{emotions[i]}_na.png', dpi=300)
+    plt.close('all')
