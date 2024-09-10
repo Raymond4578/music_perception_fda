@@ -2,8 +2,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-import numpy as np
-
 ################################################
 # Compare the amplitude and phase distance range
 ################################################
@@ -48,6 +46,20 @@ clust_results_a = pd.read_csv('./alignment/output/dataframe/clust_pred_results.c
 clust_results_na = pd.read_csv('./no_alignment/output_na/dataframe_na/clust_pred_results_na.csv')
 
 amp_compare = clust_results_a['amp_pred'] == clust_results_na['amp_pred']
+
+clust_comp_df = clust_results_a[['ID', 'Piece']].copy()
+clust_comp_df['compare'] = [0 if val == False else 1 for val in amp_compare]
+
+# Change the long table into wide table
+clust_comp_wide_df = clust_comp_df.pivot(index='ID', columns='Piece', values='compare')
+clust_comp_wide_df = clust_comp_wide_df.reindex(sorted(clust_comp_wide_df.index, key=lambda x: int(x[1:])))
+
+# 创建 heatmap
+plt.figure(figsize=(10, 8))  # 设置图表大小
+sns.heatmap(clust_comp_wide_df, cmap="plasma", annot=False, cbar=True)
+plt.title('Agreement of Clustering Results')
+plt.show()
+plt.close('all')
 
 print(f'The agreement between aligned data and misaligned is {sum(amp_compare) / len(amp_compare):.2f}.')
 
