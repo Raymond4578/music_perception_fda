@@ -37,7 +37,6 @@ def extract_number(path):
 file_paths = sorted(file_paths, key=extract_number)
 pattern = re.compile(r'music(\d+)\.csv')
 
-data_dict = dict()
 info_df = pd.DataFrame()
 all_diff_aligned_data = list()
 all_diff_warp_func = list()
