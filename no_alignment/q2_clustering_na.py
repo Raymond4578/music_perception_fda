@@ -4,7 +4,6 @@ import numpy as np
 import pandas as pd
 import skfda
 import matplotlib.pyplot as plt
-from fdasrsf import pairwise_align_functions
 from skfda.ml.clustering import KMeans
 from skfda.exploratory.visualization.clustering import ClusterPlot
 
