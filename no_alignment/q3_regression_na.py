@@ -2,7 +2,6 @@ import re
 import glob
 import numpy as np
 import pandas as pd
-from fdasrsf import pairwise_align_functions
 import fdasrsf.utility_functions as uf
 from scipy.interpolate import make_interp_spline
 import skfda
