@@ -1,5 +1,12 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
+
+import numpy as np
+
+################################################
+# Compare the amplitude and phase distance range
+################################################
 
 amp_pha_dist_a = pd.read_csv('./alignment/output/dataframe/amp_pha_dist_summ_stat.csv')
 amp_pha_dist_na = pd.read_csv('./no_alignment/output_na/dataframe_na/amp_pha_dist_summ_stat_na.csv')
@@ -33,6 +40,16 @@ for aspect in ['amp', 'pha']:
     plt.show()
     plt.close('all')
 
+################################################
+# Compare the amplitude clustering results
+################################################
+
+clust_results_a = pd.read_csv('./alignment/output/dataframe/clust_pred_results.csv')
+clust_results_na = pd.read_csv('./no_alignment/output_na/dataframe_na/clust_pred_results_na.csv')
+
+amp_compare = clust_results_a['amp_pred'] == clust_results_na['amp_pred']
+
+print(f'The agreement between aligned data and misaligned is {sum(amp_compare) / len(amp_compare):.2f}.')
 
 
 
