@@ -102,3 +102,15 @@ def check_folder_na():
             os.makedirs(path)
 
     return None
+
+def check_folder_compare():
+    comopare_output_path = './compare'
+    path_ls = [
+        comopare_output_path
+    ]
+
+    for path in path_ls:
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+    return None

@@ -2,6 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from utils import check_folder_compare
+
+# check wheter all the required folders are exist or not
+check_folder_compare()
+
 ################################################
 # Compare the amplitude and phase distance range
 ################################################
