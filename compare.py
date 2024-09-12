@@ -35,7 +35,7 @@ for aspect in ['amp', 'pha']:
     elif aspect == 'pha':
         plt.suptitle('Phase Distance Summary Statistics Comparison', fontsize=20)
     plt.tight_layout()
-    plt.show()
+    plt.savefig(f'./compare/{aspect}_dist_compare.png', dpi=300)
     plt.close('all')
 
 ################################################
@@ -58,7 +58,8 @@ clust_comp_wide_df = clust_comp_wide_df.reindex(sorted(clust_comp_wide_df.index,
 plt.figure(figsize=(10, 8))  # 设置图表大小
 sns.heatmap(clust_comp_wide_df, cmap="plasma", annot=False, cbar=True)
 plt.title('Agreement of Clustering Results')
-plt.show()
+plt.tight_layout()
+plt.savefig(f'./compare/clust_compare.png', dpi=300)
 plt.close('all')
 
 print(f'The agreement between aligned data and misaligned is {sum(amp_compare) / len(amp_compare):.2f}.')
