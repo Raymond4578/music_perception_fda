@@ -4,6 +4,9 @@ import glob
 import numpy as np
 import pandas as pd
 from fdasrsf import pairwise_align_functions
+import fdasrsf.utility_functions as uf
+from scipy.integrate import trapezoid
+from numpy import sqrt
 
 def load_data(data_filepath):
     # read in targets
@@ -114,3 +117,9 @@ def check_folder_compare():
             os.makedirs(path)
 
     return None
+
+def l2norm(f1, f2, time):
+    q1 = uf.f_to_srsf(f1, time)
+    q2 = uf.f_to_srsf(f2, time)
+    Dy = sqrt(trapezoid((q2 - q1) ** 2, time))
+    return Dy

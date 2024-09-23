@@ -19,7 +19,8 @@ amp_pha_dist = pd.concat([amp_pha_dist_na, amp_pha_dist_a], ignore_index=True)
 
 # 设置全局字体大小
 plt.rcParams.update({'font.size': 18})  # 将 14 替换为你想要的字体大小
-for aspect in ['amp', 'pha']:
+# for aspect in ['amp', 'pha']:
+for aspect in ['amp']:
     fig, axes = plt.subplots(3, 4, figsize=(19, 10))
     # 确保 axes 是一维数组，方便遍历
     axes = axes.flatten()
@@ -51,6 +52,10 @@ clust_results_a = pd.read_csv('./alignment/output/dataframe/clust_pred_results.c
 clust_results_na = pd.read_csv('./no_alignment/output_na/dataframe_na/clust_pred_results_na.csv')
 
 amp_compare = clust_results_a['amp_pred'] == clust_results_na['amp_pred']
+
+print(sum(clust_results_a['amp_pred'] == 1))
+print(len(clust_results_a['amp_pred']))
+print(sum(clust_results_na['amp_pred'] == 1))
 
 clust_comp_df = clust_results_a[['ID', 'Piece']].copy()
 clust_comp_df['compare'] = [0 if val == False else 1 for val in amp_compare]
