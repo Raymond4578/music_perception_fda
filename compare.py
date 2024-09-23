@@ -51,11 +51,16 @@ for aspect in ['amp']:
 clust_results_a = pd.read_csv('./alignment/output/dataframe/clust_pred_results.csv')
 clust_results_na = pd.read_csv('./no_alignment/output_na/dataframe_na/clust_pred_results_na.csv')
 
-amp_compare = clust_results_a['amp_pred'] == clust_results_na['amp_pred']
+# A table for the count of predicted abnormal people
+amp_pred_count_na = clust_results_na.groupby('Piece')['amp_pred'].sum().astype(int).reset_index()
+amp_pred_count = clust_results_a.groupby('Piece')['amp_pred'].sum().astype(int).reset_index()
+pha_pred_count = clust_results_a.groupby('Piece')['pha_pred'].sum().astype(int).reset_index()
+pred_count = pd.concat([amp_pred_count_na, amp_pred_count['amp_pred'], pha_pred_count['pha_pred']], axis = 1)
+pred_count.columns = ['Piece', 'amp_pred_na', 'amp_pred_a', 'pha_pred_a']
+pred_count.to_csv(f'./compare/pred_abnormal_count.csv', index=False)
 
-print(sum(clust_results_a['amp_pred'] == 1))
-print(len(clust_results_a['amp_pred']))
-print(sum(clust_results_na['amp_pred'] == 1))
+# Generate a heatmap to visualize the difference
+amp_compare = clust_results_a['amp_pred'] == clust_results_na['amp_pred']
 
 clust_comp_df = clust_results_a[['ID', 'Piece']].copy()
 clust_comp_df['compare'] = [0 if val == False else 1 for val in amp_compare]
