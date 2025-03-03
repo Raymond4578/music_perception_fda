@@ -1,4 +1,6 @@
 import os
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import fdasrsf.utility_functions as uf
@@ -60,11 +62,11 @@ print(
     not_aligned_amp_dist_full_df.groupby("Piece")["Amp_dist"].agg(["mean", "std"]).round(2)
 )
 print(
-"The summary statistics of amplitude distance for aligned data:\n",
+    "The summary statistics of amplitude distance for aligned data:\n",
     aligned_amp_pha_dist_full_df.groupby("Piece")["Amp_dist"].agg(["mean", "std"]).round(2)
 )
 print(
-"The summary statistics of phase distance for aligned data:\n",
+    "The summary statistics of phase distance for aligned data:\n",
     aligned_amp_pha_dist_full_df.groupby("Piece")["Pha_dist"].agg(["mean", "std"]).round(2)
 )
 
@@ -72,4 +74,36 @@ print(
 # compare the amplitude distance range
 #############################################################################
 
+print(not_aligned_amp_dist_full_df)
+
+# # set up a
+# amp_dist_df = pd.concat(
+#     [
+#         not_aligned_amp_dist_full_df.groupby("Piece")["Amp_dist"].agg(["mean", "std"]).reset_index(),
+#         aligned_amp_pha_dist_full_df.groupby("Piece")["Amp_dist"].agg(["mean", "std"]).reset_index()
+#     ],
+#     ignore_index=True
+# )
+# amp_dist_df = amp_dist_df.assign(
+#     align=(["misaligned"] * 12 + ["aligned"] * 12),
+#     emotion=(['anger'] * 3 + ['happiness'] * 3 + ['sadness'] * 3 + ['tenderness'] * 3) * 2
+# )
+
+amp_dist_full_df = pd.concat(
+    [
+        not_aligned_amp_dist_full_df,
+        aligned_amp_pha_dist_full_df.drop("Pha_dist", axis=1)
+    ],
+    ignore_index=True
+).assign(
+    Align=(["misaligned"] * not_aligned_amp_dist_full_df.shape[0] + ["aligned"] * aligned_amp_pha_dist_full_df.shape[0])
+)
+# adjust id value for ploting
+amp_dist_plot_df = amp_dist_full_df[["Emotion", "Piece", "Amp_dist"]]
+amp_dist_plot_df['Piece'] = amp_dist_plot_df['Piece'].astype(float)
+amp_dist_plot_df.loc[:not_aligned_amp_dist_full_df.shape[0] - 1, 'Piece'] -= 0.2 # 修改前12行 - 0.2
+amp_dist_plot_df.loc[not_aligned_amp_dist_full_df.shape[0]:, 'Piece'] += 0.2 # 修改后12行 + 0.2
+
+amp_dist_plot_df.boxplot(column="Amp_dist", by="Piece", grid=False)
+plt.show()
 
