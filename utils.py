@@ -123,3 +123,15 @@ def l2norm(f1, f2, time):
     q2 = uf.f_to_srsf(f2, time)
     Dy = sqrt(trapezoid((q2 - q1) ** 2, time))
     return Dy
+
+def get_emo(music_idx):
+    if music_idx in [1, 2, 3]:
+        return 'anger'
+    elif music_idx in [4, 5, 6]:
+        return 'happiness'
+    elif music_idx in [7, 8, 9]:
+        return 'sadness'
+    elif music_idx in [10, 11, 12]:
+        return 'tenderness'
+    else:
+        raise 'Out of music index range.'
