@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
+from fdasrsf import pairwise_align_functions
 import fdasrsf.utility_functions as uf
 
-from utils import load_data, l2norm, get_emo
+from utils import load_data, align_data, l2norm, get_emo
 
 output_path = './output'
 if not os.path.exists(output_path):
@@ -13,6 +14,61 @@ if not os.path.exists(output_path):
 
 # Load the data
 target_dict, data_dict = load_data('../data/')
+aligned_data_dict, warp_func_dict = align_data(target_dict, data_dict)
+
+#############################################################################
+# show the original data, aligned data and warping function
+#############################################################################
+
+music_idx = 3
+t = np.linspace(0, 1, target_dict[music_idx].shape[0])
+
+obs_data_df = data_dict[music_idx].copy()
+# Drop first two column about idx and ID
+obs_data_df.drop(obs_data_df.columns[:2], axis=1, inplace=True)
+obs_data = np.array(obs_data_df).astype(float)
+
+# Draw the plot
+plt.figure(figsize=(5, 4))
+for i, response in enumerate(obs_data):
+    # Draw all the responses with dashed line
+    plt.plot(t, response, linewidth=0.2, color='black', linestyle='--')
+plt.plot(t, target_dict[music_idx], linewidth=2, color='blue', linestyle='-') # target
+# plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left', borderaxespad=0.)
+plt.tight_layout()
+plt.savefig('./output/showNotAlignedData.png', dpi=300)
+plt.close('all')
+
+aligned_data_df = aligned_data_dict[music_idx].copy()
+# Drop first two column about idx and ID
+aligned_data_df.drop(aligned_data_df.columns[:2], axis=1, inplace=True)
+aligned_data = np.array(aligned_data_df).astype(float)
+
+# Draw the plot
+plt.figure(figsize=(5, 4))
+for i, response in enumerate(aligned_data):
+    # Draw all the responses with dashed line
+    plt.plot(t, response, linewidth=0.2, color='black', linestyle='--')
+plt.plot(t, target_dict[music_idx], linewidth=2, color='blue', linestyle='-') # target
+# plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left', borderaxespad=0.)
+plt.tight_layout()
+plt.savefig('./output/showAlignedData.png', dpi=300)
+plt.close('all')
+
+warp_func_df = warp_func_dict[music_idx].copy()
+# Drop first two column about idx and ID
+warp_func_df.drop(warp_func_df.columns[:2], axis=1, inplace=True)
+warp_func = np.array(warp_func_df).astype(float)
+
+# Draw the warping function plot
+plt.figure(figsize=(5, 4))
+for i, response in enumerate(warp_func):
+    # Draw all the responses with dashed line
+    plt.plot(t, response, linewidth=0.2, color='black', linestyle='--')
+# plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left', borderaxespad=0.)
+plt.tight_layout()
+plt.savefig('./output/showWarpFunc.png', dpi=300)
+plt.close('all')
 
 #############################################################################
 # calculate the amplitude and phase distance for not aligned and aligned data
@@ -91,8 +147,6 @@ misaligned_amp_dist_plot_df = amp_dist_plot_df[amp_dist_plot_df["Align"] == "mis
 aligned_amp_dist_plot_df = amp_dist_plot_df[amp_dist_plot_df["Align"] == "aligned"]
 misaligned_amp_dist_plot_df.loc[:, "Piece"] -= 0.2 # 修改前12行 - 0.2
 aligned_amp_dist_plot_df.loc[:, "Piece"] += 0.2 # 修改前12行 - 0.2
-# amp_dist_plot_df.loc[:not_aligned_amp_dist_full_df.shape[0] - 1, 'Piece'] -= 0.2 # 修改前12行 - 0.2
-# amp_dist_plot_df.loc[not_aligned_amp_dist_full_df.shape[0]:, 'Piece'] += 0.2 # 修改后12行 + 0.2
 
 # 按照 group 分组，提取每个组的 value 列数据，并保证顺序正确
 grouped_misaligned_amp_dist_plot_df = misaligned_amp_dist_plot_df.groupby('Piece')['Amp_dist'].apply(list).sort_index()
@@ -102,7 +156,6 @@ grouped_aligned_amp_dist_plot_df = aligned_amp_dist_plot_df.groupby('Piece')['Am
 # 取出分组的实际值（作为 x 轴位置）和对应的数据列表
 positions_misaligned = grouped_misaligned_amp_dist_plot_df.index.tolist()
 positions_aligned = grouped_aligned_amp_dist_plot_df.index.tolist()
-# positions = grouped_amp_dist_plot_df.index.tolist()   # [0.2, 0.4, 0.8]
 
 # 创建图形，使用 patch_artist=True 使得箱形图可以填充颜色，同时设置宽度方便两组图形并列
 plt.figure(figsize=(10, 6))

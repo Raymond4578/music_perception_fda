@@ -40,4 +40,5 @@ plt.xlabel('$t$')
 plt.locator_params(axis='x', nbins=10)
 plt.tight_layout()
 plt.savefig('./output/showData.png', dpi=300)
+plt.close('all')
 

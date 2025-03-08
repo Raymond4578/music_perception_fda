@@ -35,7 +35,7 @@ def load_data(data_filepath):
         # get music id
         match = pattern.search(path)
         idx = int(match.group(1))
-        data_dict[idx] = pd.read_csv(path).dropna()
+        data_dict[idx] = pd.read_csv(path).dropna().reset_index(drop=True)
 
     return target_dict, data_dict
 
@@ -57,22 +57,36 @@ def check_folder():
 
     return None
 
-def align_data(target_dict:dict, data_dict:dict, music_idx=1):
-    # Then, do alignment for a specific music piece
-    t = np.linspace(0, 1, len(target_dict[music_idx]))
-    target = target_dict[music_idx]
-    data_df = data_dict[music_idx]
-    obs_data_ls, aligned_data_ls, warp_func_ls = list(), list(), list()
-    for index, row in data_df.iterrows():
-        # 这里可以看extract 数据index和受试者ID
-        row_data = row.iloc[2:].values.astype(float)
-        if np.isnan(row_data).all() == True:
-            print('有NA！！！！！')
-        obs_data_ls.append(row_data)
-        aligned_data, warp_func = pairwise_align_functions(target, row_data, t, omethod='DP2')[:2]
-        aligned_data_ls.append(aligned_data)
-        warp_func_ls.append(warp_func)
-    return obs_data_ls, aligned_data_ls, warp_func_ls
+def align_data(target_dict:dict, data_dict:dict):
+    aligned_data_dict, warp_func_dict = dict(), dict()
+    for music_idx, response_df in data_dict.items():
+        temp_aligned_data, temp_warp_func = response_df.copy(), response_df.copy()
+        for row_idx, row in response_df.iterrows():
+            row_data = row.iloc[2:].values.astype(float)
+            t = np.linspace(0, 1, row_data.shape[0])
+            # aligned the data to target
+            aligned_data, warp_func = pairwise_align_functions(target_dict[music_idx], row_data, t, omethod='DP2')[:2]
+            temp_aligned_data.iloc[row_idx, 2:], temp_warp_func.iloc[row_idx, 2:] = aligned_data, warp_func
+        aligned_data_dict[music_idx] = temp_aligned_data
+        warp_func_dict[music_idx] = temp_warp_func
+    return aligned_data_dict, warp_func_dict
+
+
+    # # Then, do alignment for a specific music piece
+    # t = np.linspace(0, 1, len(target_dict[music_idx]))
+    # target = target_dict[music_idx]
+    # data_df = data_dict[music_idx]
+    # obs_data_ls, aligned_data_ls, warp_func_ls = list(), list(), list()
+    # for index, row in data_df.iterrows():
+    #     # 这里可以看extract 数据index和受试者ID
+    #     row_data = row.iloc[2:].values.astype(float)
+    #     if np.isnan(row_data).all() == True:
+    #         print('有NA！！！！！')
+    #     obs_data_ls.append(row_data)
+    #     aligned_data, warp_func = pairwise_align_functions(target, row_data, t, omethod='DP2')[:2]
+    #     aligned_data_ls.append(aligned_data)
+    #     warp_func_ls.append(warp_func)
+    # return obs_data_ls, aligned_data_ls, warp_func_ls
 
 def data_after_align(target_dict, data_dict):
     # formulate a dictionary for observed data, aligned data and warpping functions
