@@ -3,7 +3,9 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
-from fdasrsf import pairwise_align_functions
+import skfda
+from skfda.representation.basis import BSplineBasis
+from skfda.preprocessing.dim_reduction import FPCA
 import fdasrsf.utility_functions as uf
 
 from utils import load_data, align_data, l2norm, get_emo
@@ -20,7 +22,7 @@ aligned_data_dict, warp_func_dict = align_data(target_dict, data_dict)
 # show the original data, aligned data and warping function
 #############################################################################
 
-music_idx = 3
+music_idx = 6
 t = np.linspace(0, 1, target_dict[music_idx].shape[0])
 
 obs_data_df = data_dict[music_idx].copy()
@@ -36,7 +38,7 @@ for i, response in enumerate(obs_data):
 plt.plot(t, target_dict[music_idx], linewidth=2, color='blue', linestyle='-') # target
 # plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left', borderaxespad=0.)
 plt.tight_layout()
-plt.savefig('./output/showNotAlignedData.png', dpi=300)
+plt.savefig(f'./output/showNotAlignedDataMusic{music_idx}.png', dpi=300)
 plt.close('all')
 
 aligned_data_df = aligned_data_dict[music_idx].copy()
@@ -52,7 +54,7 @@ for i, response in enumerate(aligned_data):
 plt.plot(t, target_dict[music_idx], linewidth=2, color='blue', linestyle='-') # target
 # plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left', borderaxespad=0.)
 plt.tight_layout()
-plt.savefig('./output/showAlignedData.png', dpi=300)
+plt.savefig(f'./output/showAlignedDataMusic{music_idx}.png', dpi=300)
 plt.close('all')
 
 warp_func_df = warp_func_dict[music_idx].copy()
@@ -67,8 +69,96 @@ for i, response in enumerate(warp_func):
     plt.plot(t, response, linewidth=0.2, color='black', linestyle='--')
 # plt.legend(bbox_to_anchor=(1.05, 0.5), loc='center left', borderaxespad=0.)
 plt.tight_layout()
-plt.savefig('./output/showWarpFunc.png', dpi=300)
+plt.savefig(f'./output/showWarpFuncMusic{music_idx}.png', dpi=300)
 plt.close('all')
+
+#############################################################################
+# calculate the percentage of variance explianed by PC1
+#############################################################################
+
+# Initialize a dataframe to save fpca variance explained
+fpca_var_explained = list()
+# Initialize dict to save mean function and pc1
+fpca_info_dict = dict()
+
+# Set a BSpline Basis
+bspline_basis = BSplineBasis(n_basis=10)
+for music_idx in range(1, 13):
+    t = np.linspace(0, 1, len(target_dict[music_idx]))
+    obs_data_fd = skfda.FDataGrid(data_matrix=data_dict[music_idx].iloc[:, 2:], grid_points=t)
+    # fit data with a basis for smoothness
+    basis_obs_data_fd = obs_data_fd.to_basis(bspline_basis)
+
+    obs_data_fpca = FPCA(n_components=2)
+    obs_data_fpca.fit(basis_obs_data_fd)
+    # extract the explained variance ratio
+    obs_data_pc_explained_ratio = obs_data_fpca.explained_variance_ratio_
+    # prepare for plot information
+    obs_data_fpca_dict = {
+        "mean": basis_obs_data_fd.mean()(t).flatten(),
+        "pc1": obs_data_fpca.components_(t)[0, :, :].flatten()
+    }
+
+
+    aligned_data_fd = skfda.FDataGrid(data_matrix=aligned_data_dict[music_idx].iloc[:, 2:], grid_points=t)
+    # fit data with a basis for smoothness
+    basis_aligned_data_fd = aligned_data_fd.to_basis(bspline_basis)
+    aligned_data_fpca = FPCA(n_components=2)
+    aligned_data_fpca.fit(basis_aligned_data_fd)
+    # extract the explained variance ratio
+    aligned_data_pc_explained_ratio = aligned_data_fpca.explained_variance_ratio_
+    # prepare for plot information
+    aligned_data_fpca_dict = {
+        "mean": basis_aligned_data_fd.mean()(t).flatten(),
+        "pc1": aligned_data_fpca.components_(t)[0, :, :].flatten()
+    }
+
+
+    warp_func_fd = skfda.FDataGrid(data_matrix=warp_func_dict[music_idx].iloc[:, 2:], grid_points=t)
+    # fit data with a basis for smoothness
+    basis_warp_func_fd = warp_func_fd.to_basis(bspline_basis)
+    warp_func_fpca = FPCA(n_components=2)
+    warp_func_fpca.fit(basis_warp_func_fd)
+    # extract the explained variance ratio
+    warp_func_pc_explained_ratio = warp_func_fpca.explained_variance_ratio_
+    # prepare for plot information
+    warp_func_fpca_dict = {
+        "mean": basis_warp_func_fd.mean()(t).flatten(),
+        "pc1": warp_func_fpca.components_(t)[0, :, :].flatten()
+    }
+
+
+    # save all the explianed variance into the list
+    fpca_var_explained.append(
+        np.hstack((obs_data_pc_explained_ratio, aligned_data_pc_explained_ratio, warp_func_pc_explained_ratio))
+    )
+
+    # save all fpca info to fpca_info_dict
+    fpca_info_dict[music_idx] = {
+        "obs_data": obs_data_fpca_dict,
+        "aligned_data": aligned_data_fpca_dict,
+        "warp_func": warp_func_fpca_dict
+    }
+
+# transfer to a dataframe
+fpca_var_explained = pd.DataFrame(fpca_var_explained)
+fpca_var_explained.insert(0, "ID", np.arange(1, 13))
+fpca_var_explained.columns = ["ID", "NA_AMP_PC1", "NA_AMP_PC2", "A_AMP_PC1", "A_AMP_PC2", "A_PHA_PC1", "A_PHA_PC2"]
+fpca_var_explained.to_csv("./output/fpca_var_explained.csv", index=False)
+
+# 定义格式化规则（除了 'ID' 列之外，其余列都保留 4 位小数）
+formatters = {
+    'NA_AMP_PC1': '{:.4f}'.format,
+    'NA_AMP_PC2': '{:.4f}'.format,
+    'A_AMP_PC1': '{:.4f}'.format,
+    'A_AMP_PC2': '{:.4f}'.format,
+    'A_PHA_PC1': '{:.4f}'.format,
+    'A_PHA_PC2': '{:.4f}'.format,
+}
+
+# 生成 LaTeX 表格代码（不输出行索引）
+latex_code = fpca_var_explained.to_latex(index=False, formatters=formatters)
+# print(latex_code)
 
 #############################################################################
 # calculate the amplitude and phase distance for not aligned and aligned data
@@ -113,18 +203,18 @@ for music_idx, response_df in data_dict.items():
 not_aligned_amp_dist_full_df.to_csv('./output/notAlignedAmpDist.csv', index=False)
 aligned_amp_pha_dist_full_df.to_csv('./output/alignedAmpPhaDist.csv', index=False)
 # print out the mean and std for the data
-print(
-    "The summary statistics of amplitude distance for not aligned data:\n",
-    not_aligned_amp_dist_full_df.groupby("Piece")["Amp_dist"].agg(["mean", "std"]).round(2)
-)
-print(
-    "The summary statistics of amplitude distance for aligned data:\n",
-    aligned_amp_pha_dist_full_df.groupby("Piece")["Amp_dist"].agg(["mean", "std"]).round(2)
-)
-print(
-    "The summary statistics of phase distance for aligned data:\n",
-    aligned_amp_pha_dist_full_df.groupby("Piece")["Pha_dist"].agg(["mean", "std"]).round(2)
-)
+# print(
+#     "The summary statistics of amplitude distance for not aligned data:\n",
+#     not_aligned_amp_dist_full_df.groupby("Piece")["Amp_dist"].agg(["mean", "std"]).round(2)
+# )
+# print(
+#     "The summary statistics of amplitude distance for aligned data:\n",
+#     aligned_amp_pha_dist_full_df.groupby("Piece")["Amp_dist"].agg(["mean", "std"]).round(2)
+# )
+# print(
+#     "The summary statistics of phase distance for aligned data:\n",
+#     aligned_amp_pha_dist_full_df.groupby("Piece")["Pha_dist"].agg(["mean", "std"]).round(2)
+# )
 
 #############################################################################
 # compare the amplitude distance range
